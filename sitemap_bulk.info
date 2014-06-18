@@ -1,7 +1,7 @@
 ; $Id$
 name = Sitemap Bulk
 description = Sitemap Bulk CSV Upload
-package = StraightNorth
+package = Michalsen
 core = 7.x
 
 
