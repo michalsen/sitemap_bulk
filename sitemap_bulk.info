@@ -1,0 +1,7 @@
+; $Id$
+name = Sitemap Bulk
+description = Sitemap Bulk CSV Upload
+package = StraightNorth
+core = 7.x
+
+

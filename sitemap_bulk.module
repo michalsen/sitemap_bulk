@@ -1,0 +1,127 @@
+<?php
+
+
+function sitemap_bulk_menu() {
+  $items = array();
+  $items['admin/sitemap_bulk'] = array(
+              'title' => 'Sitemap Bulk Control',
+              'page callback' => 'sitemap_bulk',
+              'access arguments' => array('access sitemap_bulk content'),
+              'description' => 'SN Tracking Control',
+              'access callback' => TRUE,
+              'type' => MENU_NORMAL_ITEM,
+          );
+   return $items;
+}
+
+function sitemap_bulk() {
+  global $user;
+  if ($user->uid == 1) {
+    return drupal_get_form('sitemap_bulk_form');
+  }
+}
+
+function sitemap_bulk_form($form, $form_state) {
+  //dpm($form_state);
+
+     $form['markup'] = array(
+        '#markup' => 'Upload CSV file with a single path on each line.<br><a href="/admin/config/search/xmlsitemap/custom">Custom Links</a>',
+       );
+      $form['file'] = array(
+        '#type' => 'file',
+        '#title' => t('Bulk CSV Upload'),
+        '#description' => t('<i>Will overwrite existing <strong>custom</strong> data!</i>'),
+       );
+
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Submit',
+       );
+      $path = variable_get('file_public_path', conf_path() . '/files');
+
+      $form['#validate'][] = 'bulk_xml_form_validate';
+      $form['#submit'][] = 'bulk_xml_form_submit';
+
+  return $form;
+}
+
+
+function bulk_xml_form_validate($form, &$form_state) {
+  $file = file_save_upload('file', array(
+    'file_validate_extensions' => array('csv'), 
+   ));
+
+
+   if ($files = file_move($file, 'public://')) {
+      $form_state['storage']['files'] = $files;
+       //dpm('Review Data:');
+  }
+}
+
+
+function bulk_xml_form_submit($form, &$form_state) {
+
+ if (isset($form_state['storage']['files'])) {
+  $file = $form_state['storage']['files'];
+
+  $file->status = FILE_STATUS_PERMANENT;
+  file_save($file)or die(print 'error saving');
+  
+  $csv = fopen($file->uri, 'r')or die(print 'error');
+
+  // For the Microsoft line delimiters
+  ini_set( 'auto_detect_line_endings', TRUE );
+  $headers = fgetcsv($csv);
+
+   // CSV FILE TO ARRAY
+     if (($handle = fopen($file->uri, 'r')) === FALSE) {
+           die('Error opening file');
+        }
+
+  $complete = array();
+    while ($row = fgetcsv($handle, 1024, ',')) {
+           $complete[] = $row[0];
+         }
+  
+$delete = db_delete('xmlsitemap')
+            ->condition('type', 'custom')
+            ->execute();
+
+$i = 1000000;
+ foreach ( $complete as $path ) {           
+
+    db_insert('xmlsitemap')
+       ->fields(array('id','type','loc','language','access','status','priority'))
+       ->values(array(
+         'id'       => $i,
+         'type'     => 'custom',
+         'loc'      => $path,
+         'language' => 'und',
+         'access'   => 1,
+         'status'   => 1,
+         'priority' => 0.5,
+
+      ))
+    ->execute();
+
+    dpm($path . ' added');
+  $i++;
+    }
+   }
+   fclose($handle);
+ 
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
