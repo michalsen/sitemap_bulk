@@ -1,4 +1,3 @@
-Sitemap Bulk Import
+Simple Sitemap Bulk Loader
 
-No, this does not use the sitemapxml hook api.
-It is just a raw import of custom url's
+An experimental bulk loader for the sitemap module.
