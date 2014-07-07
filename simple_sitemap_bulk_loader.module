@@ -1,5 +1,8 @@
 <?php
-
+/** 
+ * @file
+ * Simple Sitemap Bulk Loader
+ */
 
 function simple_sitemap_bulk_loader_menu() {
   $items = array();
@@ -91,7 +94,7 @@ $i = 1000000;
  foreach ( $complete as $path ) {           
 
     db_insert('xmlsitemap')
-       ->fields(array('id','type','loc','language','access','status','priority'))
+       ->fields(array('id', 'type', 'loc', 'language', 'access', 'status', 'priority'))
        ->values(array(
          'id'       => $i,
          'type'     => 'custom',
